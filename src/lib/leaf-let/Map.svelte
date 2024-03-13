@@ -48,7 +48,7 @@
 			L.control.layers(baseLayers).addTo(map);
 
 			// Export Button
-			var showHome = `<a href="/" title="Voltar" type="button" class="btn btn-sm variant-filled">Dashboard</a>`;
+			var showHome = `<a href="/dashboard" title="Voltar" type="button" class="btn btn-sm variant-filled">Dashboard</a>`;
 			var showHomeButton = new L.Control({ position: 'bottomleft' });
 			showHomeButton.onAdd = function (map) {
 				this._div = L.DomUtil.create('div');
