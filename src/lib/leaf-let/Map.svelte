@@ -6,26 +6,6 @@
 	let mapElement: HTMLElement;
 	let editableLayers: any;
 
-	function geojsonExport() {
-		if (browser) {
-			console.log('Teste');
-		}
-		let nodata = '{"type":"FeatureCollection","features":[]}';
-		let jsonData = JSON.stringify(editableLayers.toGeoJSON());
-		let dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonData);
-		let datenow = new Date();
-		let datenowstr = datenow.toLocaleDateString('pt-BR');
-		let exportFileDefaultName = 'export_draw_' + datenowstr + '.geojson';
-		let linkElement = document.createElement('a');
-		linkElement.setAttribute('href', dataUri);
-		linkElement.setAttribute('download', exportFileDefaultName);
-		if (jsonData == nodata) {
-			alert('Nenhuma elemento mapeado');
-		} else {
-			linkElement.click();
-		}
-	}
-
 	onMount(async () => {
 		if (browser) {
 			map = L.map(mapElement).setView([-7.61564, 15.059012], 19);
@@ -77,18 +57,7 @@
 			};
 			showHomeButton.addTo(map);
 
-			// Export Button
-			var showExport = `<a href="#" id="btn-export" title="Exportar arquivo GeoJSON" type="button" class="btn btn-sm variant-filled">Exportar</a>`;
-			var showExportButton = new L.Control({ position: 'topright' });
-			showExportButton.onAdd = function (map) {
-				this._div = L.DomUtil.create('div');
-				this._div.innerHTML = showExport;
-				return this._div;
-			};
-			showExportButton.addTo(map);
-
 			// Adicionar controle de camadas ao mapa
-
 			editableLayers = new L.FeatureGroup();
 			map.addLayer(editableLayers);
 
@@ -155,14 +124,32 @@
 			map.remove();
 		}
 	});
+
+	function geojsonExport() {
+		let nodata = '{"type":"FeatureCollection","features":[]}';
+		let jsonData = JSON.stringify(editableLayers.toGeoJSON());
+		let dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonData);
+		let datenow = new Date();
+		let datenowstr = datenow.toLocaleDateString('pt-BR');
+		let exportFileDefaultName = 'export_draw_' + datenowstr + '.geojson';
+		let linkElement = document.createElement('a');
+		linkElement.setAttribute('href', dataUri);
+		linkElement.setAttribute('download', exportFileDefaultName);
+		if (jsonData == nodata) {
+			alert('Nenhuma elemento mapeado');
+		} else {
+			linkElement.click();
+		}
+	}
 </script>
 
 <main>
+	<button class="btn btn-sm variant-filled mb-5" on:click={geojsonExport}>Exportar</button>
 	<div bind:this={mapElement}></div>
 </main>
 
 <style lang="postcss">
 	main div {
-		height: 800px;
+		height: 85vh;
 	}
 </style>
