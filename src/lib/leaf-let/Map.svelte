@@ -4,20 +4,23 @@
 
 	let map: L.Map | undefined;
 	let mapElement: HTMLElement;
+	let editableLayers: any;
 
 	onMount(async () => {
 		if (browser) {
-			map = L.map(mapElement).setView([51.505, -0.09], 13);
+			map = L.map(mapElement).setView([-7.61564, 15.059012], 19);
 
 			//-- Definir os mapas
 			let osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				maxZoom: 19,
+				useCache: true,
 				crossOrigin: true
 			});
 
 			let googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
 				maxZoom: 20,
 				subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+				useCache: true,
 				crossOrigin: true
 			});
 
@@ -27,6 +30,7 @@
 					maxZoom: 20,
 					minZoom: 2,
 					subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+					useCache: true,
 					crossOrigin: true
 				}
 			);
@@ -41,9 +45,10 @@
 
 			// Apresentar o mapa
 			googleSat.addTo(map);
+			L.control.layers(baseLayers).addTo(map);
 
 			// Export Button
-			var showHome = `<a href="/" title="Voltar" type="button" class="btn btn-sm variant-filled">Dashboard</a>`;
+			var showHome = `<a href="/dashboard" title="Voltar" type="button" class="btn btn-sm variant-filled">Dashboard</a>`;
 			var showHomeButton = new L.Control({ position: 'bottomleft' });
 			showHomeButton.onAdd = function (map) {
 				this._div = L.DomUtil.create('div');
@@ -53,9 +58,7 @@
 			showHomeButton.addTo(map);
 
 			// Adicionar controle de camadas ao mapa
-			L.control.layers(baseLayers).addTo(map);
-
-			var editableLayers = new L.FeatureGroup();
+			editableLayers = new L.FeatureGroup();
 			map.addLayer(editableLayers);
 
 			var MyCustomMarker = L.Icon.extend({
@@ -111,7 +114,6 @@
 				if (type === 'marker') {
 					layer.bindPopup('A popup!');
 				}
-				console.log();
 				editableLayers.addLayer(layer);
 			});
 		}
@@ -119,18 +121,39 @@
 
 	onDestroy(async () => {
 		if (map) {
-			console.log('Unloading Leaflet map.');
 			map.remove();
 		}
 	});
+
+	function geojsonExport() {
+		let nodata = '{"type":"FeatureCollection","features":[]}';
+		let jsonData = JSON.stringify(editableLayers.toGeoJSON());
+		let dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonData);
+		let datenow = new Date();
+		let datenowstr = datenow.toLocaleDateString('pt-BR');
+		let exportFileDefaultName = 'export_draw_' + datenowstr + '.geojson';
+		let linkElement = document.createElement('a');
+		linkElement.setAttribute('href', dataUri);
+		linkElement.setAttribute('download', exportFileDefaultName);
+		if (jsonData == nodata) {
+			alert('Nenhuma elemento mapeado');
+		} else {
+			linkElement.click();
+		}
+	}
 </script>
 
 <main>
+	<button class="btn btn-sm variant-filled mb-5" on:click={geojsonExport}>Exportar</button>
 	<div bind:this={mapElement}></div>
 </main>
 
 <style lang="postcss">
 	main div {
+<<<<<<< HEAD
 		height: 90vh;
+=======
+		height: 85vh;
+>>>>>>> ccc4fa86a684e20e613ab6772ac489cbf760da1d
 	}
 </style>
