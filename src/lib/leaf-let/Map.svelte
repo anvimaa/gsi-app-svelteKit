@@ -131,6 +131,6 @@
 
 <style lang="postcss">
 	main div {
-		height: 800px;
+		height: 90vh;
 	}
 </style>
