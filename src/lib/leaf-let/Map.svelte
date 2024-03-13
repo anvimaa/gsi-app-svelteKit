@@ -4,20 +4,43 @@
 
 	let map: L.Map | undefined;
 	let mapElement: HTMLElement;
+	let editableLayers: any;
+
+	function geojsonExport() {
+		if (browser) {
+			console.log('Teste');
+		}
+		let nodata = '{"type":"FeatureCollection","features":[]}';
+		let jsonData = JSON.stringify(editableLayers.toGeoJSON());
+		let dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonData);
+		let datenow = new Date();
+		let datenowstr = datenow.toLocaleDateString('pt-BR');
+		let exportFileDefaultName = 'export_draw_' + datenowstr + '.geojson';
+		let linkElement = document.createElement('a');
+		linkElement.setAttribute('href', dataUri);
+		linkElement.setAttribute('download', exportFileDefaultName);
+		if (jsonData == nodata) {
+			alert('Nenhuma elemento mapeado');
+		} else {
+			linkElement.click();
+		}
+	}
 
 	onMount(async () => {
 		if (browser) {
-			map = L.map(mapElement).setView([51.505, -0.09], 13);
+			map = L.map(mapElement).setView([-7.61564, 15.059012], 19);
 
 			//-- Definir os mapas
 			let osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				maxZoom: 19,
+				useCache: true,
 				crossOrigin: true
 			});
 
 			let googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
 				maxZoom: 20,
 				subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+				useCache: true,
 				crossOrigin: true
 			});
 
@@ -27,6 +50,7 @@
 					maxZoom: 20,
 					minZoom: 2,
 					subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+					useCache: true,
 					crossOrigin: true
 				}
 			);
@@ -41,6 +65,7 @@
 
 			// Apresentar o mapa
 			googleSat.addTo(map);
+			L.control.layers(baseLayers).addTo(map);
 
 			// Export Button
 			var showHome = `<a href="/" title="Voltar" type="button" class="btn btn-sm variant-filled">Dashboard</a>`;
@@ -52,10 +77,19 @@
 			};
 			showHomeButton.addTo(map);
 
-			// Adicionar controle de camadas ao mapa
-			L.control.layers(baseLayers).addTo(map);
+			// Export Button
+			var showExport = `<a href="#" id="btn-export" title="Exportar arquivo GeoJSON" type="button" class="btn btn-sm variant-filled">Exportar</a>`;
+			var showExportButton = new L.Control({ position: 'topright' });
+			showExportButton.onAdd = function (map) {
+				this._div = L.DomUtil.create('div');
+				this._div.innerHTML = showExport;
+				return this._div;
+			};
+			showExportButton.addTo(map);
 
-			var editableLayers = new L.FeatureGroup();
+			// Adicionar controle de camadas ao mapa
+
+			editableLayers = new L.FeatureGroup();
 			map.addLayer(editableLayers);
 
 			var MyCustomMarker = L.Icon.extend({
@@ -111,7 +145,6 @@
 				if (type === 'marker') {
 					layer.bindPopup('A popup!');
 				}
-				console.log();
 				editableLayers.addLayer(layer);
 			});
 		}
@@ -119,7 +152,6 @@
 
 	onDestroy(async () => {
 		if (map) {
-			console.log('Unloading Leaflet map.');
 			map.remove();
 		}
 	});
